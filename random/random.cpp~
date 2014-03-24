@@ -1,0 +1,46 @@
+#include <iostream>
+#include <stdlib.h>
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+int GetRandomI(int iTotalNum, int iGetCount,vector<int> *retVi )
+{
+	int *aTest =  new int[iTotalNum];
+	for(int nCount = 0; nCount < iTotalNum; nCount ++)
+	{
+		aTest[nCount] = nCount;
+	}
+	int nPos, nTemp;
+
+	srand((unsigned)time(NULL));
+
+	for(int nCount = 0; nCount < 10; nCount ++)
+	{
+		nPos = rand()%10;
+		nTemp = aTest[nPos];
+		aTest[nPos] = aTest[nCount];
+		aTest[nCount] = nTemp;
+
+		cout << nCount<<" "<< aTest[nCount]<< endl;
+
+	}
+	for(int index = 0; index <iGetCount && index <iTotalNum; index++)
+	{
+		retVi->push_back(aTest[index]);
+	}
+	return 0;
+}
+
+int main()
+{
+	vector<int> iretVi;
+	GetRandomI(10, 2, &iretVi);
+	for(int index = 0; index <iretVi.size() ; index++)
+	{
+		printf("%d\n", iretVi[index] );
+	}
+
+	return 0;
+}
+

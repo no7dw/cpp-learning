@@ -1,0 +1,34 @@
+#include "ad.h"
+AdvertisementFactory* AdvertisementFactory::_instance = 0;
+AdvertisementFactory::~AdvertisementFactory()
+{ 
+	printf("** deconstructing AdvertisementFactory **\n"); 
+	if(!_instance)
+		delete _instance;
+}
+AdvertisementFactory::AdvertisementFactory()
+{	
+	
+}
+AdvertisementFactory::AdvertisementFactory(const CourseInfo &CI)
+{
+	m_CI = CI;
+	m_CI.SendbySM = 8;
+	printf("** constructing AdvertisementFactory **\n");
+} 
+AdvertisementFactory* AdvertisementFactory::CreateInstance(const CourseInfo &CI)
+{
+	if(_instance == 0 ) 
+	{
+		printf("** new AdvertisementFactory **\n");
+		_instance = new AdvertisementFactory(CI);		
+	}
+		
+	return _instance;
+
+} 
+int AdvertisementFactory::Book()
+{
+	printf("book Advertisement  ID = %s \t SendbySM = %d \n", m_CI.ID, m_CI.SendbySM);
+	
+}

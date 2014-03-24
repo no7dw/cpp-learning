@@ -1,0 +1,251 @@
+#include "Txml.h"
+// #include <stdio.h>
+// #include <iostream>
+// #include <string.h>
+#include "../Util.h"
+
+using namespace std;
+
+Txml::Txml()
+{
+	
+	for(int i=0;i<ExamNum;i++)
+	{
+		memset(&QuestionItemArray[i].QID,0,sizeof(char)*MAXID);
+		memset(&QuestionItemArray[i].QContent,0,sizeof(char)*MAXQCONTENT);
+		memset(&QuestionItemArray[i].ContentAudio,0,sizeof(char)*MAXPATH);
+		memset(&QuestionItemArray[i].ChoiceItemA,0,sizeof(ChoiceItem));
+		memset(&QuestionItemArray[i].ChoiceItemB,0,sizeof(ChoiceItem));
+		memset(&QuestionItemArray[i].ChoiceItemC,0,sizeof(ChoiceItem));
+		memset(&QuestionItemArray[i].ChoiceItemD,0,sizeof(ChoiceItem));
+		memset(&QuestionItemArray[i].Answer,0,sizeof(char));
+	}
+}
+Txml::~Txml()
+{
+	printf("[%s:%d]:%s()- #### - !!\n",__FILE__,__LINE__,__func__);
+	//delete	[]QuestionItemArray ;//not generate dynamicly no needed to delete
+	//QuestionItemArray = NULL;
+	
+}
+
+int Txml::LoadXml(const char *XmlFilePath)
+{
+
+	XXml::LoadXml(XmlFilePath);
+	//OutputDebugString( "#### Txml::LoadXml ####");
+
+	/*TiXmlDocument **/myDocument = new TiXmlDocument(XmlFilePath);
+	myDocument ->LoadFile();
+		
+	//begin read
+	TiXmlElement *RootElement = myDocument->RootElement();//Resource
+
+	//Resource	->	QuestionItemArray
+
+	TiXmlElement *FirstQuestionItem = RootElement->FirstChildElement();		 
+
+	int index = 0;
+	
+	while ( FirstQuestionItem != NULL )
+	{
+		TiXmlElement *ContentElem = FirstQuestionItem->FirstChildElement();
+		TiXmlElement *ContentAudioElem = ContentElem->NextSiblingElement();
+		TiXmlElement *ChoiceAElem = ContentAudioElem->NextSiblingElement();
+		TiXmlElement *ChoiceBElem = ChoiceAElem->NextSiblingElement();
+		TiXmlElement *ChoiceCElem = ChoiceBElem->NextSiblingElement();
+		TiXmlElement *ChoiceDElem = ChoiceCElem->NextSiblingElement();
+		TiXmlElement *AnswerElem = ChoiceDElem->NextSiblingElement();
+
+		strcpy( QuestionItemArray[index].QID , FirstQuestionItem->Attribute("id") );
+		cout << QuestionItemArray[index].QID << endl; 
+		
+
+		//A		
+		if(0==strcmp("TEXT",ChoiceAElem->Attribute("STYLE")) && ChoiceAElem->FirstChild() )
+		{			
+			QuestionItemArray[index].ChoiceItemA.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+			strcpy(QuestionItemArray[index].ChoiceItemA.ChoiceContent , ChoiceAElem->FirstChild()->Value());
+			cout << "ChoiceStyle " <<QuestionItemArray[index].ChoiceItemA.EnumChoiceStyle  << endl;
+		}
+		else if(0==strcmp("IMAGE",ChoiceAElem->Attribute("STYLE")) && ChoiceAElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemA.EnumChoiceStyle = CHOICE_STYLE_IMG;			
+			strcpy(QuestionItemArray[index].ChoiceItemA.ChoicePath , ChoiceAElem->FirstChild()->Value());
+			cout << "ChoiceStyle "<< QuestionItemArray[index].ChoiceItemA.EnumChoiceStyle  << endl;
+		}
+		else
+		{
+			 cout << "None Style " << ChoiceAElem->Attribute("STYLE") << endl;
+			 QuestionItemArray[index].ChoiceItemA.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+		}
+
+		//B
+		if(0==strcmp("TEXT",ChoiceBElem->Attribute("STYLE")) && ChoiceBElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemB.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+			strcpy(QuestionItemArray[index].ChoiceItemB.ChoiceContent , ChoiceBElem->FirstChild()->Value());
+			cout << "ChoiceStyle " <<QuestionItemArray[index].ChoiceItemB.EnumChoiceStyle  << endl;
+		}
+		else if(0==strcmp("IMAGE",ChoiceBElem->Attribute("STYLE")) && ChoiceBElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemB.EnumChoiceStyle = CHOICE_STYLE_IMG;
+			strcpy(QuestionItemArray[index].ChoiceItemB.ChoicePath , ChoiceBElem->FirstChild()->Value());
+			cout << "ChoiceStyle "<< QuestionItemArray[index].ChoiceItemB.EnumChoiceStyle  << endl;
+		}
+		else
+		{
+			 cout << "None Style " << ChoiceBElem->Attribute("STYLE") << endl;
+			 QuestionItemArray[index].ChoiceItemB.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+		}
+		
+		//C
+		if(0==strcmp("TEXT",ChoiceCElem->Attribute("STYLE")) && ChoiceCElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemC.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+			strcpy(QuestionItemArray[index].ChoiceItemC.ChoiceContent , ChoiceCElem->FirstChild()->Value());
+			cout << "ChoiceStyle " <<QuestionItemArray[index].ChoiceItemC.EnumChoiceStyle  << endl;
+		}
+		else if(0==strcmp("IMAGE",ChoiceCElem->Attribute("STYLE")) && ChoiceCElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemC.EnumChoiceStyle = CHOICE_STYLE_IMG;
+			strcpy(QuestionItemArray[index].ChoiceItemC.ChoicePath , ChoiceCElem->FirstChild()->Value());
+			cout << "ChoiceStyle "<< QuestionItemArray[index].ChoiceItemC.EnumChoiceStyle  << endl;
+		}
+		else
+		{
+			 cout << "None Style " << ChoiceCElem->Attribute("STYLE") << endl;
+			 QuestionItemArray[index].ChoiceItemC.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+		}
+
+		//D
+		if(0==strcmp("TEXT",ChoiceDElem->Attribute("STYLE")) && ChoiceDElem->FirstChild() )
+		{
+			strcpy(QuestionItemArray[index].ChoiceItemD.ChoiceContent , ChoiceDElem->FirstChild()->Value());
+			QuestionItemArray[index].ChoiceItemD.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+			cout << "ChoiceStyle " <<QuestionItemArray[index].ChoiceItemD.EnumChoiceStyle  << endl;
+		}
+		else if(0==strcmp("IMAGE",ChoiceDElem->Attribute("STYLE")) && ChoiceDElem->FirstChild() )
+		{
+			QuestionItemArray[index].ChoiceItemD.EnumChoiceStyle = CHOICE_STYLE_IMG;
+			strcpy(QuestionItemArray[index].ChoiceItemD.ChoicePath , ChoiceDElem->FirstChild()->Value());
+			cout << "ChoiceStyle "<< QuestionItemArray[index].ChoiceItemD.EnumChoiceStyle  << endl;
+		}
+		else
+		{
+			 cout << "None Style " << ChoiceDElem->Attribute("STYLE") << endl;
+			 QuestionItemArray[index].ChoiceItemD.EnumChoiceStyle = CHOICE_STYLE_TEXT;
+		}
+		
+		 
+
+
+		//问题内容		//bug sometime hasn't this	//if fix 
+		if(ContentElem->FirstChild())
+		{					
+			/*
+			string strQContent;
+			//strQContent.assign(ContentElem->FirstChild()->Value(),strlen(ContentElem->FirstChild()->Value()));
+			
+			strQContent.append(ContentElem->FirstChild()->Value());
+			TiXmlElement *TempContentElement = ContentElem;
+			while(TempContentElement->FirstChild())
+			{
+				strQContent.append(TempContentElement->FirstChild()->Value());
+				TempContentElement=TempContentElement->NextSiblingElement();
+			}
+			UTIL_String_Replace(strQContent , "<br/>", "\r\n");//有<br/>影响xml读 ，只读取到前的节点<br/>
+			strcpy(QuestionItemArray[index].QContent,strQContent.c_str());
+			*/
+			strcpy(QuestionItemArray[index].QContent,ContentElem->FirstChild()->Value());
+                        cout << QuestionItemArray[index].QContent <<endl;
+		
+		}
+		
+		//问题音频		//bug sometime hasn't this //if fix 
+		if(ContentAudioElem->FirstChild())
+		{
+			strcpy(QuestionItemArray[index].ContentAudio , ContentAudioElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].ContentAudio <<endl;		 
+		}
+		
+		//选项A
+		if(ChoiceAElem->FirstChild())
+		{
+			strcpy(QuestionItemArray[index].ChoiceItemA.ChoiceContent , ChoiceAElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].ChoiceItemA.ChoiceContent <<endl;		  
+		}
+		
+
+		//选项B
+		if(ChoiceBElem->FirstChild())
+		{
+			strcpy(QuestionItemArray[index].ChoiceItemB.ChoiceContent , ChoiceBElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].ChoiceItemB.ChoiceContent <<endl; 		 
+		}
+
+		//选项C		//bug sometime hasn't this
+		if(ChoiceCElem->FirstChild())
+		{
+			strcpy(QuestionItemArray[index].ChoiceItemC.ChoiceContent , ChoiceCElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].ChoiceItemC.ChoiceContent <<endl; 		 
+		}
+
+		//选项D		//bug sometime hasn't this
+		if(ChoiceDElem->FirstChild())
+		{	
+			strcpy(QuestionItemArray[index].ChoiceItemD.ChoiceContent , ChoiceDElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].ChoiceItemD.ChoiceContent <<endl; 		 
+		}
+
+
+		//答案	
+		if( AnswerElem->FirstChild())
+		{
+			strcpy(QuestionItemArray[index].Answer , AnswerElem->FirstChild()->Value());
+			cout << QuestionItemArray[index].Answer <<endl;
+		}
+
+		index = index + 1;
+		FirstQuestionItem = FirstQuestionItem->NextSiblingElement();
+	}
+// 	
+	//LastStartPoint Should be compute here 
+	
+	//delete myDocument;//bug ?
+ 
+	//end read
+	
+	/*OutputDebugString ("index = ");
+	OutputDebugString( index );*/
+		
+	//OutputDebugString ( "#### Loop done going out of Txml::LoadXml  ####");
+	//initilized  
+	QuestionItemArraySize= index;
+	return 1;
+	
+}
+
+QuestionItem Txml:: QueryQuestionbyID(const char *ID)
+{
+	int index = 0;
+	index = atoi(ID);	
+	cout << index <<endl;	
+	return QuestionItemArray[index];
+}
+
+QuestionItem* Txml:: QueryQuestionArray()
+{
+	
+	return QuestionItemArray;
+}
+
+bool Txml::IsImage(const char *ID )
+{
+	if(QuestionItemArray[0].ChoiceItemA.EnumChoiceStyle == CHOICE_STYLE_IMG )
+		return true;
+	else if(QuestionItemArray[0].ChoiceItemA.EnumChoiceStyle == CHOICE_STYLE_TEXT )
+		return false;
+	else
+		return false;
+}

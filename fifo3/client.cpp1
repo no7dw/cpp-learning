@@ -1,0 +1,152 @@
+#include "client.h"
+#include <iostream>
+ 
+//int main(int argc ,char **argv)
+int client(OpType OT_In)
+//int client(std::string grade , std::string hash)
+{
+	printf("[%s:%d]:%s()- #### - !!\n",__FILE__,__LINE__,__func__);
+	int server_fifo_fd;
+	int client_fifo_fd;
+	int res;
+	
+	char client_fifo_name[NAME_SIZE];
+	
+	MessageClient MC1;
+	MC1.client_pid = getpid();
+	Message_Book MB;
+	Message_Status MS;
+	Message_LimitInfo ML;
+	
+	sprintf(client_fifo_name, CLIENT_FIFO_NAME, MC1.client_pid);
+
+	if (mkfifo(client_fifo_name, 0777) == -1)
+	{
+	    fprintf(stderr, "Sorry, create client fifo failure!\n");
+	    exit(EXIT_FAILURE);
+	}
+	    //BUG:: Using the following , when server_fifo exist but server has'nt start , it will keep waiting in open
+	    //FIXME::use O_NONBLOCK to exit when server hasn't start
+	//server_fifo_fd = open(SERVER_FIFO_NAME, O_WRONLY);
+	server_fifo_fd = open( SERVER_FIFO_NAME, O_WRONLY|O_NONBLOCK);
+	if (server_fifo_fd == -1)
+	{
+	    fprintf(stderr, "Sorry, open server fifo failure!\n");
+	    exit(EXIT_FAILURE);
+	}    
+	
+// 	int OT = MC1.OT;
+// 	OT = Status;
+	
+	switch(OT_In)
+	{
+	    case Add:
+	    {
+		
+		MC1.OT = Add;
+		printf("\n writing Add \n");
+		write(server_fifo_fd, &MC1, sizeof(MC1));
+	    }
+	    break;
+	    case Book:
+	    {
+		 // the following should be in parameter
+	    ////////////////////Construct the Message_Book Begin////////////////////
+		
+		//Construct the MessageClient		
+		
+		MC1.OT = Book;		
+		MB.MC = MC1;
+		
+		//Construct the CourseInfo
+		CourseInfo CI1;		
+		strcpy( CI1.Hash, "000000012");
+		CI1.Grade = 1;				
+		strcpy( CI1.Path, "/tmp/hdd/volumes/HDD/12/unit3");
+		strcpy( CI1.ID, "123456789");
+		strcpy( CI1.Name, "How to learn math");
+		CI1.Level = 12 ;
+		MB.CI = CI1;
+	
+		////////////////////Construct the Message_Book Complete////////////////////
+		printf("\n writing Book \n");
+		write(server_fifo_fd, &MB, sizeof(MB));
+	    }
+		break;
+	    case Status:
+	    {
+		////////////////////Construct the Message_Status Begin////////////////////
+		
+		
+		MC1.OT = Status;
+		MS.MC = MC1;
+		JobInfoC JIC1;
+		MS.JIC = JIC1;
+		////////////////////Construct the Message_Status Complete////////////////////
+		printf("\n writing Status \n");
+		write(server_fifo_fd, &MS, sizeof(MS));
+	    }
+		break;
+	    case LimitSpeed:
+	    {
+		////////////////////Construct the Message_LimitInfo Begin////////////////////
+		 
+		 
+		 MC1.OT = LimitSpeed;
+		 ML.MC = MC1;
+		 LimitInfo LI1;
+		 LI1.DownloadSpeedLimitTo = 21;//20kB/s
+		 LI1.UploadSpeedLimitTo = 10;//10kB/s
+		 strcpy( LI1.ModuleName , "AV");
+		 ML.LI = LI1;
+		 
+		 ////////////////////Construct the Message_LimitInfo Begin////////////////////
+		 printf("\n writing Limit \n");
+		 write(server_fifo_fd, &ML, sizeof(Message_LimitInfo));
+	    }
+		break;
+	    default:
+		break;	 
+	
+	}
+	client_fifo_fd = open(client_fifo_name, O_RDONLY);
+	if (client_fifo_fd == -1)
+	{
+	    fprintf(stderr, "Sorry, client fifo open failure!\n");
+	    exit(EXIT_FAILURE);
+	}
+
+	ResultInfo RI;
+	memset( &RI, 0 , sizeof(RI));	
+	
+	switch(OT_In)
+	{
+	    case Book:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;
+	    case Status:
+		res = read(client_fifo_fd, &MS, sizeof(Message_Status));
+		std::cout << "Receive pid : " << MS.MC.client_pid <<" Percent : " << MS.JIC.Percent << std::endl;
+		break;
+	    case LimitSpeed:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;
+	    default:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;	 
+	
+	}
+    
+// 	if (res > 0)
+// 	{
+// 	    std::cout << "Receive pid : " << RI.MC.client_pid <<" result : " << RI.result << std::endl;
+// 	}
+
+	close(client_fifo_fd);
+	close(server_fifo_fd);
+	unlink(client_fifo_name);
+	printf("[%s:%d]:%s()- #### - !!\n",__FILE__,__LINE__,__func__);
+	exit(EXIT_SUCCESS);
+	//return SUCCEED;
+}
+

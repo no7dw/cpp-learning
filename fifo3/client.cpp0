@@ -1,0 +1,143 @@
+#include "client.h"
+#include <iostream>
+ 
+//int main(int argc ,char **argv)
+//int client(std::string grade , std::string hash)
+//int client(char *grade , char *hash)
+int main()
+{
+	printf("[%s:%d]:%s()- #### - !!\n",__FILE__,__LINE__,__func__);
+	int server_fifo_fd;
+	int client_fifo_fd;
+
+	int res;
+
+	char client_fifo_name[NAME_SIZE];
+
+ /*   
+    ////////////////////Construct the Message_Book Begin////////////////////
+	Message_Book MB;
+	//Construct the MessageClient
+	MessageClient MC1;
+	MC1.client_pid = getpid();
+	MC1.OT = Book;
+	
+	MB.MC = MC1;
+	//Construct the CourseInfo
+	CourseInfo CI1;
+	
+// 	if (argc>=2)
+// 	{
+//		CI1.Grade = atoi(argv[1]);
+//		strcpy ( CI1.Hash ,argv[2] );
+// 	}
+// 	else
+// 	{
+// 		strcpy( CI1.Hash, "000000012");
+// 		CI1.Grade = 1;		
+// 	}
+	
+//  	CI1.Grade = atoi(grade.c_str());
+//  	strcpy ( CI1.Hash ,hash.c_str() );
+	CI1.Grade = atoi( grade );
+	strcpy ( CI1.Hash ,hash );
+	
+	strcpy( CI1.Path, "/tmp/hdd/volumes/HDD/12/unit3");
+	strcpy( CI1.ID, "123456789");
+	CI1.Level = 12 ;
+
+	MB.CI = CI1;
+	
+	////////////////////Construct the Message_Book Complete////////////////////
+*/	
+	////////////////////Construct the Message_Status Begin////////////////////
+	Message_Status MS;
+	MessageClient MC1;
+	MC1.client_pid = getpid();
+	MC1.OT = Status;
+	MS.MC = MC1;
+	JobInfoC JIC1;
+	MS.JIC = JIC1;
+	////////////////////Construct the Message_Status Complete////////////////////
+	
+	sprintf(client_fifo_name, CLIENT_FIFO_NAME, MC1.client_pid);
+
+	if (mkfifo(client_fifo_name, 0777) == -1)
+	{
+	    fprintf(stderr, "Sorry, create client fifo failure!\n");
+	    exit(EXIT_FAILURE);
+	}
+	    //BUG:: Using the following , when server_fifo exist but server has'nt start , it will keep waiting in open
+	    //FIXME::use O_NONBLOCK to exit when server hasn't start
+	//server_fifo_fd = open(SERVER_FIFO_NAME, O_WRONLY);
+	server_fifo_fd = open( SERVER_FIFO_NAME, O_WRONLY|O_NONBLOCK);
+	if (server_fifo_fd == -1)
+	{
+	    fprintf(stderr, "Sorry, open server fifo failure!\n");
+	    exit(EXIT_FAILURE);
+	}
+
+    //    sprintf(CI.data, "%d", msg.client_pid);
+		
+
+	//printf("%d sent %s \n", MC1.client_pid, CI1.Hash);
+	
+	int OT = MC1.OT;
+//	OT = Status;
+	OT = Book;
+	switch(OT)
+	{
+	    case Book:
+		write(server_fifo_fd, &MB, sizeof(MB));
+		break;
+	    case Status:
+		write(server_fifo_fd, &MS, sizeof(MS));
+		break;
+	    case LimitSpeed:
+		write(server_fifo_fd, &MS, sizeof(MS));
+		break;
+	    default:
+		break;	 
+	
+	}
+	client_fifo_fd = open(client_fifo_name, O_RDONLY);
+	if (client_fifo_fd == -1)
+	{
+	    fprintf(stderr, "Sorry, client fifo open failure!\n");
+	    exit(EXIT_FAILURE);
+	}
+
+	ResultInfo RI;
+	memset( &RI, 0 , sizeof(RI));	
+	
+	switch(OT)
+	{
+	    case Book:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;
+	    case Status:
+		res = read(client_fifo_fd, &MS, sizeof(Message_Status));
+		std::cout << "Receive pid : " << MS.MC.client_pid <<" Percent : " << MS.JIC.Percent << std::endl;
+		break;
+	    case LimitSpeed:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;
+	    default:
+		res = read(client_fifo_fd, &RI, sizeof(RI));
+		break;	 
+	
+	}
+    
+// 	if (res > 0)
+// 	{
+// 	    std::cout << "Receive pid : " << RI.MC.client_pid <<" result : " << RI.result << std::endl;
+// 	}
+
+	close(client_fifo_fd);
+	close(server_fifo_fd);
+	unlink(client_fifo_name);
+	printf("[%s:%d]:%s()- #### - !!\n",__FILE__,__LINE__,__func__);
+	exit(EXIT_SUCCESS);
+	//return SUCCEED;
+}
+

@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+void UTIL_String_Replace(string &srcString, const char *strfind, const char *replaceStr)
+{
+	string strapp;
+	int pospre = 0;//index of srcString found start point
+	string sub;
+	for(int pos = srcString.find(strfind, pospre ) ;pos!=string::npos && pos< strlen(srcString.c_str()); )
+	{		
+
+		sub = srcString.substr( pospre , pos-pospre );//1 substr
+
+		strapp.append(sub);// 2 append the substr
+
+		strapp.append(replaceStr);
+
+		pospre = pos+strlen(strfind);//jump the replaceStr
+		
+		pos = srcString.find(strfind, pospre ) ;		
+		
+	}
+	if(pospre<strlen(srcString.c_str()))//still have last string
+	{
+		sub = srcString.substr( pospre , strlen(srcString.c_str())-pospre );//3 last substr
+		strapp.append(sub);
+	}
+	srcString=strapp;
+}
+int main(void)
+{
+
+	string src2= "/abc/def<br/>hij/02<br/>h h2<br/>habc";
+
+	char target[] = "@123456@";
+	char strFind[] = "<br/>";
+	printf("before src2 :%s\n",src2.c_str());
+	UTIL_String_Replace(src2,strFind, target);
+	printf("after  src2 :%s\n",src2.c_str());
+
+	return 0;
+}

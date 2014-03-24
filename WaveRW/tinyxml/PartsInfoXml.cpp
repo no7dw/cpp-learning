@@ -1,0 +1,153 @@
+#include "PartsInfoXml.h"
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
+
+
+using namespace std;
+
+PartsInfoXml::PartsInfoXml()
+{
+	
+}
+
+PartsInfoXml::~PartsInfoXml()
+{
+}
+
+int PartsInfoXml::LoadXml(const char *XmlFilePath)
+{
+	if(XXml::LoadXml(XmlFilePath)<0)
+		return -1;
+	
+	myDocument = new TiXmlDocument(XmlFilePath);
+	myDocument ->LoadFile();
+		
+	//begin read
+	pRootElement = myDocument->RootElement();//Parts
+	if(pRootElement == NULL)
+		return -1;
+
+	TiXmlElement *FirstPartInfoItem = pRootElement->FirstChildElement();
+	pFirstBookElem = FirstPartInfoItem;
+	
+	int index = 0;
+	PartInfo PI;
+	
+	while ( FirstPartInfoItem != NULL )
+	{
+//		TiXmlElement *FirstPartLevel_UpgradeValItem = FirstPartItem->NextSiblingElement();
+		PI.PartID = FirstPartInfoItem->Attribute("ID");
+		TiXmlElement *FirstNameItem = FirstPartInfoItem->FirstChildElement();		
+		PI.PartName = FirstNameItem->FirstChild()->Value();
+// 		char cPartName[100] = {0};
+// 		GetFirstChildValue(FirstNameItem , cPartName);
+// 		PI.PartName.assign(cPartName, strlen(cPartName)) ;
+		
+		TiXmlElement *FirstFlowerItem = FirstNameItem->NextSiblingElement();
+		PI.Flowers = atoi(FirstFlowerItem->FirstChild()->Value());
+// 		char cFlower[2] = {0};
+// 		GetFirstChildValue(FirstFlowerItem , cFlower);		
+// 		PI.Flowers = atoi(cFlower);
+
+		TiXmlElement *FirstCourseCountItem = FirstFlowerItem->NextSiblingElement();
+		PI.CourseCount = atoi(FirstCourseCountItem->FirstChild()->Value());
+		
+		TiXmlElement *FirstCourseLearnedItem = FirstCourseCountItem->NextSiblingElement();
+		PI.CouseLearned = atoi(FirstCourseLearnedItem->FirstChild()->Value());
+		
+		TiXmlElement *FirstGrade_UpdateTimeItem = FirstCourseLearnedItem->NextSiblingElement();
+		PI.Grade_UpdateTime = FirstGrade_UpdateTimeItem->FirstChild()->Value();
+		
+		TiXmlElement *FirstStudy_TimeItem = FirstGrade_UpdateTimeItem->NextSiblingElement();
+		PI.Study_Time = FirstStudy_TimeItem->FirstChild()->Value();
+		
+		TiXmlElement *FirstStudy_TimesItem = FirstStudy_TimeItem->NextSiblingElement();
+		if( FirstStudy_TimesItem->FirstChild() != NULL )
+		{
+			PI.Study_Times = atoi(FirstStudy_TimesItem->FirstChild()->Value());
+		}
+		else
+		{
+			PI.Study_Times = 0 ;
+		}
+		
+
+		index = index + 1;
+		
+		VPartInfo.push_back(PI);
+
+		FirstPartInfoItem = FirstPartInfoItem->NextSiblingElement();
+	}
+
+ 
+	//end read
+	
+	cout <<"\nindex = "<< index << "#### Loop done ####" <<endl;
+	
+	return 1;
+}
+
+PartInfo* PartsInfoXml::GetPartInfo(string part)
+{
+    vector<PartInfo>::iterator iter;
+    int i = 0;
+    for( iter = VPartInfo.begin(); iter != VPartInfo.end(); ++i , ++iter)
+    {
+	
+	if (part == iter->PartID )//if(iter->StudyRecordInfoID == id)
+	  return &VPartInfo[i];
+	 
+	
+    }
+    return NULL;
+}
+
+bool PartsInfoXml::UpdatePartInfo(string partID, PartInfo &partinfo)
+{
+	if( pFirstBookElem != NULL && pRootElement != NULL)
+        {
+            TiXmlElement *FirstPartInfoItem = pFirstBookElem;
+            while ( FirstPartInfoItem != NULL )
+            {
+                string strPartID = FirstPartInfoItem->Attribute("ID");		
+		
+		if( partID == strPartID)
+		{
+			TiXmlElement *FirstNameItem = FirstPartInfoItem->FirstChildElement();
+		
+			TiXmlElement *FirstFlowerItem = FirstNameItem->NextSiblingElement();
+			char cFlower[2] = {0};
+			sprintf(cFlower,  "%d" , partinfo.Flowers);
+			FirstFlowerItem->FirstChild()->SetValue(cFlower);
+
+			TiXmlElement *FirstCourseCountItem = FirstFlowerItem->NextSiblingElement();		
+			
+			TiXmlElement *FirstCourseLearnedItem = FirstCourseCountItem->NextSiblingElement();
+			char cCouseLearned[3] = {0};
+			sprintf(cCouseLearned,  "%d" , partinfo.CouseLearned);
+			FirstCourseLearnedItem->FirstChild()->SetValue(cCouseLearned);
+			
+			TiXmlElement *FirstGrade_UpdateTimeItem = FirstCourseLearnedItem->NextSiblingElement();			
+			FirstGrade_UpdateTimeItem->FirstChild()->SetValue(partinfo.Grade_UpdateTime.c_str());
+			
+			TiXmlElement *FirstStudy_TimeItem = FirstGrade_UpdateTimeItem->NextSiblingElement();
+			FirstStudy_TimeItem->FirstChild()->SetValue(partinfo.Study_Time.c_str());
+			
+			TiXmlElement *FirstStudy_TimesItem = FirstStudy_TimeItem->NextSiblingElement();			
+			char cStudy_Times[4] = {0};
+			sprintf(cStudy_Times,  "%d" , partinfo.Study_Times);
+			FirstStudy_TimesItem->FirstChild()->SetValue(cStudy_Times);
+
+				
+			myDocument->SaveFile();
+			return 0;
+
+		}
+
+                    FirstPartInfoItem = FirstPartInfoItem->NextSiblingElement();
+            }//not found
+            return -1;
+
+        }
+}

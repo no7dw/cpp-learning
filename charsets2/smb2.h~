@@ -1,0 +1,29 @@
+#ifndef __SMB_2_H
+#define __SMB_2_H
+
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+
+#include "includes.h"
+
+typedef struct _smb_iconv_t {
+        size_t (*direct)(void *cd, const char **inbuf, size_t *inbytesleft,
+                         char **outbuf, size_t *outbytesleft);
+        size_t (*pull)(void *cd, const char **inbuf, size_t *inbytesleft,
+                       char **outbuf, size_t *outbytesleft);
+        size_t (*push)(void *cd, const char **inbuf, size_t *inbytesleft,
+                       char **outbuf, size_t *outbytesleft);
+        void *cd_direct, *cd_pull, *cd_push;
+        char *from_name, *to_name;
+} *smb_iconv_t;
+
+struct charset_functions {
+	const char *name;
+	size_t (*pull)(void *, const char **inbuf, size_t *inbytesleft,
+				   char **outbuf, size_t *outbytesleft);
+	size_t (*push)(void *, const char **inbuf, size_t *inbytesleft,
+				   char **outbuf, size_t *outbytesleft);
+	struct charset_functions *prev, *next;
+};
+#endif

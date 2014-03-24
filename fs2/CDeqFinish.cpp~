@@ -1,0 +1,29 @@
+#include "CDeqFinish.h"
+
+CDeqFinish* CDeqFinish::_instance = 0;
+
+int CDeqFinish::InitQueueXml()
+{
+	m_pBL->LoadXml(ConstructXmlPath(0));	
+	m_iQueueSize += m_pBL->GetListSize();
+	DQCI* pdqci = m_pBL->GetBookListQueue();
+	for(DQCI::const_iterator iter = pdqci->begin() ;iter != pdqci->end()  ; iter ++ )
+	{
+// 			CourseInfo ci = *iter;
+		m_QCI.push_back(*iter);
+		if((*iter).Status < DOWNLOADING )
+		{
+			m_DUnReadyCI.push_back((*iter));				
+			//printf("\n\t%s\t%s\t%s\n",CI.ID,CI.Hash,CI.Name);			
+		}
+	}
+}
+
+CDeqFinish* CDeqFinish::Instance()
+{
+	if(_instance == 0)
+	{
+		_instance = new CDeqFinish();
+	}
+	return _instance;
+}

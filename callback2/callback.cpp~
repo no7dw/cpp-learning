@@ -1,0 +1,64 @@
+#include <iostream>
+using namespace std;
+
+typedef void (*CALLBACK)(int a,int b);
+
+class Example
+{
+private:
+	int m;
+	int n;
+	static CALLBACK func;
+	public:
+	void register_callback(CALLBACK fun,int k,int j);
+	void callcallback();
+	void calulate();
+	void increase(int start,int stop);
+	void decrease(int start,int stop);
+};
+
+CALLBACK Example::func=NULL;
+
+void Example::register_callback(CALLBACK fun,int k,int j)
+{
+	func=fun;
+	m=k;
+	n=j;
+}
+
+void Example::callcallback()
+{
+	Example::func(m,n);
+}
+
+void Example::increase(int start,int stop)
+{
+	for(int i= start; i< stop; i++)
+		printf("i = %d\t", i);	
+}
+
+void Example::decrease(int start,int stop)
+{
+	for(int i= start; i> stop; i--)
+		printf("i = %d\t", i);
+}
+void Example::calulate()
+{
+	if(m<n)
+		increase(m,n);
+	else
+		decrease(m,n);
+}
+void method_for_call(int a, int b)
+{
+	printf("succeed finished the calulate work from %d to %d \n",a, b);
+}
+void main(void)
+{
+	Example ex;
+	ex.register_callback(method_for_call,2,13);
+	ex.calulate();
+	
+	ex.register_callback(method_for_call,23,16);      
+	ex.calulate();
+}

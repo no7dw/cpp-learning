@@ -1,0 +1,62 @@
+ 
+#include "BookListXml.h"
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
+
+using namespace std;
+
+
+BookListXml::BookListXml()
+{
+	BookListSize = 2;
+}
+
+BookListXml::~BookListXml()
+{
+   
+}
+
+deque<CourseInfo>* BookListXml::GetUnReadyCourseInfo()
+{
+	int i = 0;
+	for(DQCI::iterator diter =QCI.begin(); diter!=QCI.end(); diter++, i++)//dqueue
+	{
+		if((*diter).Status < DOWNLOADING )
+		{
+			DUnReadyCI.push_back((*diter));				
+			//printf("\n\t%s\t%s\t%s\n",CI.ID,CI.Hash,CI.Name);			
+		}
+	}
+	return &DUnReadyCI;
+	
+}
+
+CourseInfo* BookListXml::GetCourseInfo(const std::string& CourseID, bool bis9x)
+{
+	int i = 0;
+	for(DQCI::iterator diter =QCI.begin(); diter!=QCI.end(); diter++, i++)//dqueue
+	{
+		int cmp_result = -2;
+		if(!bis9x)
+			cmp_result = strcmp( (*diter).ID ,CourseID.c_str() );
+		else
+			cmp_result = strncmp( (*diter).ID ,CourseID.c_str(), 2 );
+		
+		if(cmp_result == 0)
+		{
+			return &QCI[i];
+		}
+	}
+	return NULL;
+}
+
+int BookListXml::GetListSize()
+{
+	return BookListSize;
+}
+
+DQCI* BookListXml::GetBookListQueue()
+{
+	return &QCI;
+}

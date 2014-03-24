@@ -1,0 +1,44 @@
+#include "CgiXml.h"
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int main(int argc , char** argv)
+{
+	if(argc<2)
+		cout<< "Usage: CgiXML filename" << endl;
+
+	CgiXML *CgiXMLObj= new CgiXML();
+	CgiXMLObj->LoadXml(argv[1]);
+	
+	JobInfo *pJI;
+	pJI = CgiXMLObj->GetJobInfo("3");
+	//pJI = CgiXMLObj->GetInfo("1");
+	if (pJI != NULL)
+	{
+	  cout<< pJI->ID << endl;
+	  cout<< pJI->Priority << endl;
+	  cout<< pJI->Partition << endl;
+	  cout<< pJI->Space << endl;
+	  cout<< pJI->Name << endl;
+	  cout<< pJI->Status << endl;
+	  
+	  cout<< pJI->Size << endl;
+	  cout<< pJI->Downloaded << endl;
+	  cout<< pJI->TimeLeft << endl;
+	  cout<< pJI->Percent << endl;
+	  cout<< pJI->DwRate << " kB/s"<< endl;
+
+	  cout<< pJI->UpRate << " kB/s"<< endl;
+	  cout<< pJI->Npeers << endl;
+	 
+	  
+	}
+	else
+	  cout << "null" << endl;
+	
+	
+	return 1;
+	
+}

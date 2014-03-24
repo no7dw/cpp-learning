@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <ctype.h>
+//BUG ::cstdlib:116: error: `::system' has not been declared 
+//FIXME::
+//#include <iostream> 	//don't use this cstdlib:116
+//#include <vector>	//don't use this cstdlib:116
+  
+//using namespace std;	//don't use this cstdlib:116
+
+#define SERVER_FIFO_NAME "/tmp/server_fifo"
+#define CLIENT_ALL_FIFO_NAME "/tmp/client_all_fifo"
+#define CLIENT_FIFO_NAME "/tmp/client_%d_fifo"
+
+#define BUFFER_SIZE PIPE_BUF
+#define MESSAGE_SIZE 20
+#define NAME_SIZE 256
+
+
+typedef enum {
+	Unkown = -1,
+	Add = 0,
+	Remove,
+	Pause,
+	Status,
+	LimitSpeed,
+	Book,
+	OpTypeNum
+
+}OpType;
+
+typedef struct{
+	pid_t client_pid;
+	OpType OT;
+
+}MessageClient;
+
+
+//BUG:: need to be char*
+//BUG::server need to rewrite ResultInfo in order to return a JobInfo
+/*
+////////JobInfo///////////////
+typedef struct {
+		string ID;
+		int Priority;
+		string Partition;
+		string Space;
+		string Name;
+		string Status;
+		double Size;
+		double Downloaded;
+		string TimeLeft;
+		string Percent;
+		double DwRate;
+		double UpRate;
+		int Npeers;
+		
+}JobInfo;
+*/
+// typedef struct{
+// 	MessageClient MC;
+// 	JobInfo JI;
+// 
+// }Message_Status;
+
+
+////////JobInfoC///////////////
+typedef struct {
+		
+		
+		double Downloaded;
+		char TimeLeft[9];//99:99:99
+		char Percent[7];//99.99%
+		double DwRate;//kB/s
+		double UpRate;//kB/s
+		
+		
+}JobInfoC;
+
+typedef struct{
+	MessageClient MC;
+	JobInfoC JIC;
+
+}Message_Status;
+
+
+////////CourseInfo///////////////
+typedef struct{
+
+	char ID[10];
+	char Path[100];
+	char Hash[48];
+	int Level;
+	int Grade;
+}CourseInfo;
+
+typedef struct{
+	MessageClient MC;
+	CourseInfo CI;
+
+}Message_Book;
+
+
+
+////////LimitInfo///////////////
+typedef struct LimitInfo{
+	
+	char ModuleName[10];
+	int DownloadSpeedLimitTo;
+	int UploadSpeedLimitTo;
+
+}LimitInfo;
+
+typedef struct Message_LimitInfo
+{
+	MessageClient MC;
+	LimitInfo LI;
+
+}Message_LimitInfo;
+
+
+////////ResultInfo///////////////
+typedef enum{
+	FAIL = -1 ,
+	SUCCEED = 0 
+}Result;
+
+typedef struct ResultInfo{
+	MessageClient MC;	
+	Result result;
+
+}ResultInfo;
+
+
+
+// vector<string> Vhash1;
+// vector<string> Vhash2;
+// vector<string> Vhash3;
+
+//int client(char *grade , char *hash);
+//int client(std::string grade , std::string hash);

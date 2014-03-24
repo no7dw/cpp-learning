@@ -1,0 +1,6 @@
+192.168.2.41	BNBT_IP
+6969		BNBT_PORT
+
+192.168.4.149	Resource_SERVER_IP (Torrent_Control_Server)
+6000		Resource_SERVER_PORT (Torrent_Control_Server)
+

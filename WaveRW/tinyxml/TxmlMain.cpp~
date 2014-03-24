@@ -1,0 +1,30 @@
+#include "Txml.h"
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int main(int argc, char **argv)
+{
+	if(argc<2)
+	{
+		cout<< "Usage: TE filename" << endl;
+		return -1;
+	}
+	
+	Txml *TxmlObj= new Txml();
+	TxmlObj->LoadXml(argv[1]);
+	QuestionItem QIobj = TxmlObj->QueryQuestionbyID("2") ;
+	
+ 	cout << QIobj.QContent << endl;
+ 	cout << QIobj.ContentAudio << endl;
+ 	cout << QIobj.ChoiceItemA.ChoiceContent << endl;
+ 	cout << QIobj.ChoiceItemA.EnumChoiceStyle << endl;
+ 	cout << QIobj.Answer << endl;
+ 	
+	cout << " IsImage ?: " <<TxmlObj->IsImage("2") << endl ;
+	cout << " IsImage ?: " <<TxmlObj->IsImage() << endl ;
+
+	return 1;
+	
+}

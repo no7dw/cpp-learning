@@ -1,0 +1,290 @@
+#include "Lxml.h"
+// #include <stdio.h>
+// #include <iostream>
+// #include <string.h>
+#include "Convert.h"
+
+using namespace std;
+
+Lxml::Lxml()
+{
+
+}
+Lxml::~Lxml()
+{
+	m_VLTT.clear();
+}
+
+int Lxml::LoadXml(const char* XmlFilePath)
+{
+	if(XXml::LoadXml(XmlFilePath)<0)
+		return -1;
+	
+	myDocument = new TiXmlDocument(XmlFilePath);
+	myDocument ->LoadFile();
+		
+	//begin read
+	pRootElement = myDocument->RootElement();//Resource
+	if(pRootElement == NULL)
+		return -1;
+
+	TiXmlElement *NameItem = pRootElement->FirstChildElement();
+	TiXmlElement *FirstSentenceItem = NameItem->NextSiblingElement();
+	
+	int index = 0;
+	int paragraphindex = 0;
+	LTimeText LTT;
+	while ( FirstSentenceItem != NULL )//this time start = end
+	{
+		if(FirstSentenceItem->Attribute("paragraph"))
+		{
+			if( strcmp (FirstSentenceItem->Attribute("paragraph"),"") != 0)
+			{				
+				int pid = atoi( FirstSentenceItem->Attribute("paragraph") );
+				paragraphindex++;
+				LTT.iParagraphIndex = paragraphindex;
+				//printf("%d paragraphindex = %d\n",index,paragraphindex);
+				
+				//cout << "Got a paragraph sign"<< endl;
+			}
+		}
+		else
+		{
+			LTT.iParagraphIndex = paragraphindex;
+			//printf("%d paragraphindex = %d\n",index,paragraphindex);
+		}
+		
+		TiXmlElement *StartElem = FirstSentenceItem->FirstChildElement();
+		LTT.StartTime = StartElem->FirstChild()->Value();
+		
+		TiXmlElement *EndElem = StartElem->NextSiblingElement();
+		LTT.EndTime = EndElem->FirstChild()->Value();
+		
+		TiXmlElement *TextElem = EndElem->NextSiblingElement();
+		LTT.Text = TextElem->FirstChild()->Value();
+		
+		//cout << index <<" Text : "<< LTT.Text << endl;
+					
+		m_VLTT.push_back( LTT );		
+				
+		index = index + 1;
+		
+		FirstSentenceItem = FirstSentenceItem->NextSiblingElement();
+		LastEndPoint =  EndElem->FirstChild()->Value();
+	}
+	
+	cout <<"\nindex = "<< index << "\nparagraphindex = "<<paragraphindex <<endl;
+	//initilized  
+// 	if (index>1) //this line should be ignore because this index may =1 . Adding this for Testing
+	{
+		 LastStartPoint  = m_VLTT[index-1].StartTime ;
+		 FirstStartPoint = m_VLTT[0].StartTime ;
+		 ArraySize = index;
+	}
+	ParagraphSize = paragraphindex;
+	cout << "#### Loop done ####" <<endl;
+	
+	printoutVParagraph(*GenVParagraph(m_VLTT));	
+	return 0;
+}
+
+vector <LTimeText>*  Lxml::GenVParagraph(vector<LTimeText> &VLTT_from)
+{
+	vector<LTimeText>::iterator iter;
+	LTimeText LTTP;
+	int iParaIndex = 0 , iSentenceIndex = 0;
+	for(iter = VLTT_from.begin(); iter!=VLTT_from.end() ;iSentenceIndex++, iter++)
+	{
+		
+// 		if((*iter).iParagraphIndex )
+// 		{
+// 			LTTP.isParagraphStart = true;
+			LTTP.iParagraphIndex = (*iter).iParagraphIndex;
+			
+			if(iParaIndex >= 1 && iSentenceIndex > 0)
+			{				
+				if(iParaIndex > 1)
+					LTTP.StartTime = m_VParagraph[iParaIndex-2].EndTime;
+				
+				m_VParagraph.push_back(LTTP);
+				LTTP.Text = "";	
+				
+			}
+			else if(iParaIndex == 0)
+			{
+				LTTP.StartTime ="00:00:00:000";	
+			}
+			iParaIndex++;
+// 		}
+		if(LTTP.Text != "")		
+		{
+			LTTP.Text +="#@";			
+		}
+		LTTP.Text +=(*iter).Text;
+		
+		LTTP.EndTime = (*iter).EndTime;					
+	}
+	LTTP.StartTime = m_VParagraph[iParaIndex-2].EndTime;
+	m_VParagraph.push_back(LTTP);
+	
+	return &m_VParagraph;
+}
+
+
+void Lxml::printoutVParagraph(vector< LTimeText >& vparagraph)
+{
+	
+	int i = 0;
+	for(vector<LTimeText>::iterator iter = vparagraph.begin(); iter!=vparagraph.end() ;i++, iter++)
+	{
+		printf("%d\t%d\t%s\t%s\t\n%s\n\n", i, (*iter).iParagraphIndex , (*iter).StartTime.c_str() ,(*iter).EndTime.c_str() ,(*iter).Text.c_str());		
+	}
+}
+
+int Lxml::GetArraySize()
+{
+	return ArraySize;
+}
+
+string Lxml::QueryNextStartPointbyTime(const char *Time)
+{
+ 
+	int index=0;
+	while( strcmp(Time,FirstStartPoint.c_str()) >0  && strcmp(LastStartPoint.c_str(),Time)  >0  )
+	{
+		if(strcmp(Time,m_VLTT[index].StartTime.c_str())  >0  )
+			index++;
+		else if( 0 == strcmp(Time,m_VLTT[index].StartTime.c_str())  )
+		{
+	
+			return  m_VLTT[index+1].StartTime ;
+		}
+		else
+		{			
+			return  m_VLTT[index].StartTime;
+		}				
+	}	
+		
+	if( 0==strcmp(Time,FirstStartPoint.c_str()) && (ArraySize > 1) )
+	{	
+
+		return  m_VLTT[1].StartTime; 
+	}
+
+	return "-1";
+	
+		
+}
+
+string Lxml:: QueryNextStartPointbyTime(long second,int frameIndex)
+{
+	 string strTime;
+	 strTime = Convert::ToCharTime((int)second,frameIndex);
+	 
+	 //char ChTarget[ strlen( strTime.c_str() ) ];
+	 char ChTarget[ 13 ];
+	 strcpy(ChTarget,strTime.c_str());
+	 
+	 return QueryNextStartPointbyTime(ChTarget);
+	 
+}
+
+string Lxml::QueryPrevStartPointbyTime(const char *Time)
+{
+ 
+	int index=0;
+	while( strcmp(Time,FirstStartPoint.c_str()) >0  && strcmp(LastStartPoint.c_str(),Time)  >0  )
+	{
+		if(strcmp(Time, m_VLTT[index].StartTime.c_str())  >0  )
+			index++;
+		else if( 0 == strcmp(Time,m_VLTT[index].StartTime.c_str()) )
+		{
+
+			return  m_VLTT[index-1].StartTime;
+		}
+		else
+		{
+			//cout << "index " << index << endl;
+			if (index>=2)		
+				return  m_VLTT[index-2].StartTime;//found	 VStartTimeArray[index] is the current session
+			else
+				if(index == 1 )//BUG found when 
+				    return m_VLTT[0].StartTime;//FIXME::
+				else
+				    return "-1";
+		}				
+	}		
+	
+	if(0 == strcmp(Time, m_VLTT[0].StartTime.c_str() ) )
+	{
+		return m_VLTT[0].StartTime;
+	}
+
+	if( 0 == strcmp(Time,LastStartPoint.c_str()) && (ArraySize > 1) )
+	{	
+		return  m_VLTT[ArraySize-2].StartTime;
+	}
+	
+	if( strcmp(Time,LastStartPoint.c_str()) > 0 && strcmp(Time, LastEndPoint.c_str()) < 0 )//smaller than LastStartPoint or larger than LastEndPoint
+	{	
+		return   m_VLTT[ArraySize-1].StartTime;
+	}
+	
+	return "-1";//Not Found :reason:smaller than FistStartPoint or larger than LastStartPoint//BUG:://FIXME::Not Found :reason:smaller than FistStartPoint or larger than LastEndPoint		
+
+}
+
+string Lxml::QueryPrevStartPointbyTime(long second,int frameIndex)
+{
+	string strTime;
+	 strTime = Convert::ToCharTime((int)second,frameIndex);
+	 
+	 //char ChTarget[ strlen( strTime.c_str() ) ];
+	 char ChTarget[ 13];
+	 strcpy(ChTarget,strTime.c_str());
+	 
+	 return QueryPrevStartPointbyTime(ChTarget);
+	
+}
+
+string Lxml::QueryStartPointbyID(int ID)
+{
+	return m_VLTT[ID].StartTime.c_str();
+}
+
+string Lxml::QueryAllStartPoint(const char *XmlFilePath)
+{
+	LoadXml ( XmlFilePath);
+
+	string StrRet;	
+	for(int index=0;index<ArraySize;index++)
+	{
+		if( strcmp(StrRet.c_str(),"")!=0)
+		{
+			StrRet.append("|");
+		}
+		else//first empth
+		{
+			//do nothing
+		}
+		
+		StrRet.append(m_VLTT[index].StartTime);
+	}
+	return StrRet;
+}
+
+string Lxml::QueryTextPointbyID(int ID)
+{
+	//return &m_VLTT[ID].Text;
+	return m_VLTT[ID].Text;
+}
+
+vector<LTimeText>* Lxml::GetAllLTimeText()
+{
+	return &m_VLTT;
+}
+
+vector<LTimeText>* Lxml::GetVParagraph()
+{
+	return &m_VParagraph;
+}

@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+string UTIL_ReadFile( const char *szFile )
+{
+	FILE *pFile = NULL;
+
+	if( ( pFile = fopen( szFile, "rb" ) ) == NULL )
+	{
+		 
+
+		return string( );
+	}
+	 
+
+	fseek( pFile, 0, SEEK_END );
+	unsigned long ulFileSize = ftell( pFile );
+	fseek( pFile, 0, SEEK_SET );
+	char *pData = (char *)malloc( sizeof( char ) * ulFileSize );
+	memset( pData, 0, sizeof( char ) * ulFileSize );
+	fread( (void *)pData, sizeof( char ), ulFileSize, pFile );
+	fclose( pFile );
+	string strFile( pData, ulFileSize );
+	free( pData );
+
+	return strFile;
+}
+
+int checkNetwork()
+{
+	/***** timer ******/	
+#ifdef INTERNET
+	const char* CHECK_URL = "www.baidu.com";
+#else
+	const char* CHECK_URL = "192.168.2.252";
+#endif
+	const char* PING_RESULT = "/tmp/ping_url_result";
+	
+	char check_net[256] ;memset(check_net, 0 , sizeof(check_net));
+	sprintf( check_net , "%s %s > %s" , "ping -c 1", CHECK_URL ,  PING_RESULT);
+	
+	printf(" check_net :%s \n",check_net);
+	
+	system(check_net);
+	string strResult = UTIL_ReadFile(PING_RESULT);
+	//if(strResult.find("Destination Host Unreachable") != string::npos)
+	if(strResult.find("Destination Host Unreachable") != string::npos)
+	{
+		printf("disconnected\n");
+		return 0;//net work is connected
+	}
+	else
+	{
+		printf("connected\n");
+		return -1;//disconnected;
+	}	
+}
+
+
+int main(void)
+{
+	checkNetwork();
+}

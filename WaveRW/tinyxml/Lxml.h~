@@ -1,0 +1,117 @@
+#ifndef __L_XML_H
+#define __L_XML_H
+
+#include "XXml.h"
+
+using namespace std;
+
+typedef struct{
+	string StartTime;
+	string EndTime;
+	string Text;
+	
+	int iParagraphIndex;
+	
+}LTimeText;
+
+class Lxml : public XXml
+{
+public:
+	Lxml();
+	~Lxml();
+
+private:  	
+ 	string LastStartPoint;
+ 	string FirstStartPoint;
+	string LastEndPoint;
+	
+	int ArraySize;
+	int ParagraphSize;
+	
+	vector<LTimeText> m_VLTT;
+	
+	
+//	vector <string> VStartTimeArray;
+	
+	//有段落标记的结构体，isParagraphStart = true, Text = ""
+	vector <LTimeText> m_VParagraph;
+
+	
+	///@Summary:产生VParagraph
+	///@Param 1: 搜集的vector<LTimeText>
+	///@Return : vector<LTimeText>的指针
+	vector <LTimeText>* GenVParagraph(vector<LTimeText> &VLTT_from);
+	
+	///@输出VParagraph内容
+	void printoutVParagraph(vector <LTimeText>& vparagraph);
+	
+public:
+	
+	int LoadXml(const char *XmlFilePath);
+	///@Summary:获取分句数目
+	int GetArraySize();
+	
+	
+	
+//Normal SubSentence
+	///@Summary:查询下一句的开始点
+	///@Param 1: 时间点
+	string QueryNextStartPointbyTime(const char *Time);				
+	///@Summary:查询下一句的开始点
+	///@Param 1: 时间
+	///@Param 2: 侦
+	string QueryNextStartPointbyTime(long second,int frameIndex);		
+	
+	///@Summary:查询上一句的开始点
+	///@Param 1: 时间点
+	string QueryPrevStartPointbyTime(const char *Time);
+	///@Summary:查询上一句的开始点
+	///@Param 1: 时间
+	///@Param 2: 侦
+	string QueryPrevStartPointbyTime(long second,int frameIndex);
+	
+	///@Summary:查询当前时间所属的分句开始点
+	///@Param 1: 时间点
+	string QueryCurrStartPointbyTime(const char *Time);
+	
+	///@Summary:根据ID查询（第N句）开始点
+	///@Param 1: 时间
+	string QueryStartPointbyID(int ID);
+	
+	///@Summary: 获取xml文件的所有开始点
+	///@Param 1: xml文本路径	
+	///@Return : 所有开始点, 以“|”隔开
+	string QueryAllStartPoint(const char *XmlFilePath);
+	
+	///@Summary: 获取xml文件的所有开始点、结束点、对应文本、段落标记		
+	///@Return : vector<LTimeText>的指针
+	vector<LTimeText>* GetAllLTimeText();
+/*
+//Paragraph段
+	string QueryParagraphNextStartPointbyTime(const char *Time);				//查询下一句的开始点
+	string QueryParagraphNextStartPointbyTime(long second,int frameIndex);		
+	
+	string QueryParagraphPrevStartPointbyTime(const char *Time);				//查询上一句的开始点
+	string QueryParagraphPrevStartPointbyTime(long second,int frameIndex);
+	
+	string QueryParagraphCurrStartPointbyTime(const char *Time);				//查询当前的开始点
+	
+	string QueryParagraphStartPointbyID(int ID);
+
+	string QueryParagraphAllStartPoint(const char *XmlFilePath);
+*/
+//Text
+	///@Summary: 获取分句的文本
+	///@Param 1: 分句的ID(从0开始)	
+	string QueryTextPointbyID(int ID);
+	
+	
+	
+	///@Summary: 以段落为单位，获取xml文件的所有段的开始点、段的结束点、段的对应文本
+	///段的文本：由分句间的文本以#@隔开集合而成
+	///@Return : vector<LTimeText>的指针,
+	vector<LTimeText>* GetVParagraph();
+
+};
+
+#endif

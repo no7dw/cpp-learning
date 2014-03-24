@@ -1,0 +1,118 @@
+#include "CgiXml.h"
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
+
+
+using namespace std;
+
+CgiXML::CgiXML()/* : XXml()*/
+{
+	
+}
+CgiXML::~CgiXML()/* : ~XXml()*/
+{
+}
+/*
+ * BUG::Remember the ID will change,reboot will reset
+ * FIXME::
+ */
+int CgiXML::LoadXml(const char *XmlFilePath)
+{
+	XXml::LoadXml(XmlFilePath);
+  
+	myDocument = new TiXmlDocument(XmlFilePath);
+	myDocument ->LoadFile();
+		
+	//begin read
+	TiXmlElement *RootElement = myDocument->RootElement();//report
+
+	TiXmlElement *OperationItem = RootElement->FirstChildElement();//Operation
+
+	TiXmlElement *DaemonItem = OperationItem->NextSiblingElement();
+	
+	DaemonStatus =	DaemonItem->FirstChild()->Value();
+	cout << " DaemonStatus = "<< DaemonStatus<<endl;
+	
+	TiXmlElement *TorrentItem = DaemonItem->NextSiblingElement();
+	TiXmlElement *TotalCountItem = TorrentItem->FirstChildElement();
+	TorrentCount =	atoi(TotalCountItem->FirstChild()->Value());
+
+	TiXmlElement *JobItem = TotalCountItem->NextSiblingElement();
+	
+	int index = 0;
+	JobInfo JI;
+	while ( JobItem != NULL )
+	{
+		TiXmlElement *IDItem = JobItem->FirstChildElement();
+		JI.ID = IDItem->FirstChild()->Value();
+		
+		TiXmlElement *PriorityItem = IDItem->NextSiblingElement();
+		JI.Priority = atoi( PriorityItem->FirstChild()->Value());
+		
+		TiXmlElement *PartitionItem = PriorityItem->NextSiblingElement();
+		JI.Partition = PartitionItem->FirstChild()->Value();
+		
+		TiXmlElement *SpaceItem = PartitionItem->NextSiblingElement();
+		JI.Space = SpaceItem->FirstChild()->Value();
+		
+		TiXmlElement *NameItem = SpaceItem->NextSiblingElement();
+		JI.Name = NameItem->FirstChild()->Value();
+		
+		TiXmlElement *StatusItem = NameItem->NextSiblingElement();
+		JI.Status = StatusItem->FirstChild()->Value();
+		
+		TiXmlElement *SizeItem = StatusItem->NextSiblingElement();
+		JI.Size = atof( SizeItem->FirstChild()->Value());
+		
+		TiXmlElement *DownloadedItem = SizeItem->NextSiblingElement();
+		JI.Downloaded = atof(DownloadedItem->FirstChild()->Value());
+		
+		TiXmlElement *TimeLeftItem = DownloadedItem->NextSiblingElement();
+		JI.TimeLeft = TimeLeftItem->FirstChild()->Value();
+		
+		TiXmlElement *PercentItem = TimeLeftItem->NextSiblingElement();
+		JI.Percent = PercentItem->FirstChild()->Value();
+		
+		TiXmlElement *DwRateItem = PercentItem->NextSiblingElement();
+		JI.DwRate = atof( DwRateItem->FirstChild()->Value());//BUG:: this is a string contains kB/s
+		
+		TiXmlElement *UpRateItem = DwRateItem->NextSiblingElement();
+		JI.UpRate = atof( UpRateItem->FirstChild()->Value());//BUG:: this is a string contains kB/s
+		
+		TiXmlElement *NpeersItem = UpRateItem->NextSiblingElement();
+		JI.Npeers = atoi(NpeersItem->FirstChild()->Value());
+	
+		
+		index = index + 1;
+		
+		VJobInfo.push_back(JI);
+		
+		JobItem = JobItem->NextSiblingElement();
+	}
+// 	
+	//LastStartPoint Should be compute here 
+	
+	//delete myDocument;//2011-5-13 bug
+ 
+	//end read
+	
+	cout <<"\nindex = "<< index << "#### Loop done ####" <<endl;
+	
+	return 1;
+}
+JobInfo* CgiXML::GetJobInfo(string id)
+{
+  vector<JobInfo>::iterator iter;
+    int i = 0;
+    for( iter = VJobInfo.begin(); iter != VJobInfo.end(); ++i , ++iter)
+    {
+	int iFound = id.find(iter->ID);
+	if (iFound != string::npos )//if(iter->StudyRecordInfoID == id)
+	  return &VJobInfo[i];
+	 
+	
+    }
+    return NULL;
+}
+ 

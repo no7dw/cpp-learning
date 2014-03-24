@@ -1,0 +1,1 @@
+arm-linux-androideabi-g++   -static Util.cpp client_test.cpp   -o client_test -L /home/dengwei/standalone-toolchain/arm-linux-androideabi/lib/libsupc++.a -I /home/dengwei/standalone-toolchain/arm-linux-androideabi/include/c++/4.6/ -I /home/dengwei/standalone-toolchain/arm-linux-androideabi/include/c++/4.6/arm-linux-androideabi/

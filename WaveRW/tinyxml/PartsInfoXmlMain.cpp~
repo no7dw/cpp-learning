@@ -1,0 +1,58 @@
+#include "PartsInfoXml.h"
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int main(int argc , char** argv)
+{
+	if(argc<2)
+		cout<< "Usage: Version filename" << endl;
+
+	PartsInfoXml *PartsInfoXmlObj= new PartsInfoXml();
+	PartsInfoXmlObj->LoadXml(argv[1]);
+
+//	cout<< SettingObj->GetSystemSettingVersion() <<endl;
+//	cout<< SettingObj->GetCourseListVersion(4) <<endl;
+	
+	PartInfo *pPI,PI;
+	pPI = PartsInfoXmlObj->GetPartInfo("2");
+	if (pPI!=NULL)
+	{
+	  cout<< pPI->PartID << endl;
+	  cout<< pPI->PartName << endl;
+	  cout<< pPI->Flowers << endl;
+	  cout<< pPI->CourseCount << endl;
+	  cout<< pPI->CouseLearned << endl;
+	  cout<< pPI->Grade_UpdateTime << endl;
+	  cout<< pPI->Study_Time << endl;
+	  cout<< pPI->Study_Times << endl;
+	   
+
+	}
+	else
+	  cout << "null" << endl;
+	
+	PI= *pPI;
+	if (pPI!=NULL)
+	{
+	  cout<< PI.PartID << endl;
+	  cout<< PI.PartName << endl;
+	  cout<< PI.Flowers << endl;
+	  cout<< PI.CourseCount << endl;
+	  cout<< PI.CouseLearned << endl;
+	  cout<< PI.Grade_UpdateTime << endl;
+	  cout<< PI.Study_Time << endl;
+	  cout<< PI.Study_Times << endl;
+	   
+
+	}
+	PI.CouseLearned = 1;
+	PI.Study_Times =3;
+	PartsInfoXmlObj->UpdatePartInfo("2",PI);
+	
+	delete PartsInfoXmlObj;
+	PartsInfoXmlObj = NULL;
+	return 1;
+	
+}

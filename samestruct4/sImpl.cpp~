@@ -1,0 +1,22 @@
+#include "sImpl.h"
+
+extern SoftPackageFactory* SoftPackageFactory::CreateInstance(const CourseInfo &CI);
+
+ResourceFactory* sImpl::CreateInstance(const CourseInfo &CI)
+{
+	if( strncmp(CI.ID, "9", 1)==0 )
+	{
+		printf("**call new SoftPackageFactory **\n");
+		return SoftPackageFactory::CreateInstance(CI);
+	}
+	else if(  strncmp(CI.ID, "8", 1)==0 ) 
+	{
+		printf("**call new AdvertisementFactory **\n");
+		return AdvertisementFactory::CreateInstance(CI);		
+	}
+	else  
+	{
+		printf("**call new ResourceFactory **\n");							 
+		return ResourceFactory::CreateInstance(CI);		
+	}
+}

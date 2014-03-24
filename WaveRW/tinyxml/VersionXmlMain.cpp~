@@ -1,0 +1,31 @@
+#include "VersionXml.h"
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int main(int argc , char** argv)
+{
+	if(argc<2)
+		cout<< "Usage: Version filename" << endl;
+
+	VersionXml *pVersionXmlObj= new VersionXml();
+	pVersionXmlObj->LoadXml(argv[1]);
+	
+	cout<< pVersionXmlObj->GetLvVersion(0,1) <<endl;
+	cout<< pVersionXmlObj->GetLvVersion(0,2) <<endl;
+	cout<< pVersionXmlObj->GetLvVersion(0,12) <<endl;
+	
+	cout<< pVersionXmlObj->GetLvVersion(1,1) <<endl;
+	cout<< pVersionXmlObj->GetLvVersion(1,2) <<endl;
+	cout<< pVersionXmlObj->GetLvVersion(1,12) <<endl;
+	
+	cout<< pVersionXmlObj->SetLvVersion(0,1,"11") <<endl;
+	cout<< pVersionXmlObj->SetLvVersion(0,2,"12") <<endl;
+	cout<< pVersionXmlObj->SetLvVersion(0,12,"112") <<endl;
+	
+	delete pVersionXmlObj;
+	pVersionXmlObj = NULL;
+	return 0;
+	
+}

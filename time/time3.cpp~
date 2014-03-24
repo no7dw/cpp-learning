@@ -1,0 +1,33 @@
+
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
+#define ERROR_LOG "/tmp/hdd/volumes/HDD1/error_log"
+
+string UTIL_GetLocalTimeString()
+{
+	
+	time_t tNow = time( NULL );
+	char pTime[256];
+	memset(pTime, 0 , sizeof(char)* 256);
+	strftime(pTime, sizeof(char)*256, "%Y-%m-%d %H:%M:%S",localtime(&tNow));
+	
+	string timestr(pTime);		
+	return timestr;
+}
+
+int main(void)
+{
+	char *ptnow = UTIL_GetLocalTimeString().c_str();
+	printf("%s\n", ptnow);
+	sleep(5);
+	printf("after sleep 5 %s\n", ptnow);
+	char pTime[256];memset(pTime, 0 , sizeof(char)* 256);
+	strncpy(pTime, ptnow, strlen(ptnow));
+	sleep(3);
+	printf("pTime %s\n", pTime);
+}

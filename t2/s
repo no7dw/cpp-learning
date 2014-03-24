@@ -1,0 +1,26 @@
+  实际上，指针与引用没有多少差别。只是调用的时候，指针需要在调用的时候，临时转换一个指针。而引用则省去了这个步骤。
+  所以error: invalid initialization of non-const reference of type ‘int*&’ from a temporary of type ‘int*’
+  这个重点在于 temporary 。
+  而 "临时变量作为非const的引用参数传递" ，编译器不允许的。
+  也就是说，你原来的有一个转换的临时指针的步骤，并且是 “非const的引用(non-const reference)参数传递”，所以报错。
+  
+  如果修改以下这个临时转换，则可以进行编译通过并运行。
+
+int main() 
+{ 
+	int test[10]={1,2,3,4,5,6,7,8,9,10}; 
+
+	/***** 不用临时变量转换 *******/
+	int *temp = test;
+	func(temp,4); 
+	/***** 不用临时变量转换 *******/
+
+	cout<<"After assignment, test is "<<endl; 
+	for(int i =0;i<10;i++) 
+		printf("%d\t",test[i]);
+	printf("\n");
+} 
+
+
+ref:http://blog.baisi.net/?116670/viewspace-4407
+
